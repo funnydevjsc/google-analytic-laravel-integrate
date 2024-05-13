@@ -1,0 +1,262 @@
+<?php
+
+namespace FunnyDev\GoogleAnalytic;
+
+use DateTime;
+use Google\Service\AnalyticsData;
+use Google\Service\AnalyticsData\DateRange;
+use Google\Service\AnalyticsData\Dimension;
+use Google\Service\AnalyticsData\Metric;
+use Google\Service\AnalyticsData\Cohort;
+use Google\Service\AnalyticsData\CohortSpec;
+use Google\Service\AnalyticsData\CohortsRange;
+use Google\Service\AnalyticsData\RunReportRequest;
+
+class GoogleAnalyticHelper
+{
+    public int $daysCount;
+    public string $startDate;
+    public string $endDate;
+    public DateRange $dateRange;
+    public AnalyticsData $analytics;
+    public Dimension $dimension;
+    public Metric $metric;
+    public Cohort $cohort;
+    public CohortsRange $cohortRange;
+    public CohortSpec $cohortSpec;
+
+    /**
+     * @throws \Exception
+     */
+    public function __construct(string $metric='', string $dimension='', string $start_date='', string $end_date='')
+    {
+        $service_client = new GoogleServiceClient();
+        $this->analytics = new AnalyticsData($service_client->instance());
+        if (!empty($dimension)) {
+            $this->setDimension($dimension);
+        }
+        if (!empty($metric)) {
+            $this->setMetric($metric);
+        }
+        if (!empty($start_date) && !empty($end_date)) {
+            $this->startDate = $start_date;
+            $this->endDate = $end_date;
+            $this->daysCount = (new DateTime($start_date))->diff(new DateTime($end_date))->days+1;
+            $this->setDateRange($start_date, $end_date);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function convert_days_to_date($days, $startDate): string
+    {
+        $date = new DateTime($startDate);
+        $date->modify("+$days days");
+        return $date->format('Y-m-d');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function convert_date_keys($data, $startDate): array
+    {
+        $newData = [];
+        foreach ($data as $daysSinceStart => $value) {
+            $dayNumber = intval($daysSinceStart) - 1;
+            $newData[$this->convert_days_to_date($dayNumber, $startDate)] = $value;
+        }
+        ksort($newData);
+        return $newData;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function add_date_values($data, $endDate): array
+    {
+        $newData = [];
+        $currentData = array_values($data);
+        $today = new DateTime($endDate);
+        foreach ($currentData as $value) {
+            $dateKey = $today->format('Y-m-d');
+            $newData[$dateKey] = $value;
+            $today->modify('-1 day');
+        }
+        return $newData;
+    }
+
+    public function calculate_average_values($data): float|int
+    {
+        if (empty($data)) {
+            return 0;
+        }
+        $sum = 0;
+        foreach ($data as $value) {
+            $sum += $value;
+        }
+
+        return $sum / count($data);
+    }
+
+    public function calculate_sum_values($data): float|int
+    {
+        if (empty($data)) {
+            return 0;
+        }
+        $sum = 0;
+        foreach ($data as $value) {
+            $sum += $value;
+        }
+
+        return $sum;
+    }
+
+    public function remove_query_keys($data, $format='int'): array
+    {
+        $newData = [];
+        foreach ($data as $key => $value) {
+            $key = explode('?', $key)[0];
+            if (isset($newData[$key])) {
+                if ($format == 'int') {
+                    $newData[$key] += intval($value);
+                } elseif ($format == 'float') {
+                    $newData[$key] += floatval($value);
+                } else {
+                    $newData[$key] .= ' '.$value;
+                }
+            } else {
+                if ($format == 'int') {
+                    $newData[$key] = intval($value);
+                } elseif ($format == 'float') {
+                    $newData[$key] = floatval($value);
+                } else {
+                    $newData[$key] = $value;
+                }
+            }
+        }
+        arsort($newData);
+        return $newData;
+    }
+
+    public function convert_google_result($data): array
+    {
+        $results = [];
+        foreach ($data->getRows() as $row) {
+            $key = $row->getDimensionValues()[0]->getValue();
+            $value = $row->getMetricValues()[0]->getValue();
+            if (($key == '(not set)') || ($key == '')) {
+                $key = 'unknown';
+            }
+            if (isset($results[$key])) {
+                if (is_string($results[$key])) {
+                    $results[$key] .= ' '.$value;
+                } else {
+                    $results[$key] += $value;
+                }
+            } else {
+                $results[$key] = $value;
+            }
+        }
+
+        return $results;
+    }
+
+    public function setDateRange(string $start_date='yesterday', string $end_date='today'): DateRange
+    {
+        $dateRange = new DateRange();
+        $dateRange->setStartDate($start_date);
+        $dateRange->setEndDate($end_date);
+        $this->dateRange = $dateRange;
+        return $dateRange;
+    }
+
+    public function setMetric(string $metric): Metric
+    {
+        $instance = new Metric();
+        $instance->setName($metric);
+        $this->metric = $instance;
+        return $instance;
+    }
+
+    public function setDimension(string $dimension): Dimension
+    {
+        $instance = new Dimension();
+        $instance->setName($dimension);
+        $this->dimension = $instance;
+        return $instance;
+    }
+
+    public function setCohort(): Cohort
+    {
+        $instance = new Cohort();
+        $instance->setName('Cohort 1');
+        $instance->setDimension('firstSessionDate');
+        $instance->setDateRange($this->dateRange);
+        $this->cohort = $instance;
+        return $instance;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function setCohortRange(): CohortsRange
+    {
+        $instance = new CohortsRange();
+        $instance->setGranularity('DAILY');
+        $instance->setStartOffset(0);
+        $instance->setEndOffset($this->daysCount);
+        $this->cohortRange = $instance;
+        return $instance;
+    }
+
+    public function setCohortSpec(): CohortSpec
+    {
+        $instance = new CohortSpec();
+        $instance->setCohorts([$this->cohort]);
+        $instance->setCohortsRange($this->cohortRange);
+        $this->cohortSpec = $instance;
+        return $instance;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getReport(): array|bool
+    {
+        $request = new RunReportRequest();
+        $request->setDateRanges([$this->dateRange]);
+        $request->setDimensions([$this->dimension]);
+        $request->setMetrics([$this->metric]);
+        $result = $this->analytics->properties->runReport('properties/'.config('google-analytic.property_id'), $request);
+
+        if ($result) {
+            return $this->convert_google_result($result);
+        }
+
+        return false;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getCohortReport(): array|bool
+    {
+        $request = new RunReportRequest();
+        $this->setCohort();
+        $this->setCohortRange();
+        $this->setCohortSpec();
+        $cohort_dimension = new Dimension();
+        $cohort_dimension->setName('cohort');
+        $request->setDimensions([$cohort_dimension, $this->dimension]);
+        $request->setMetrics([$this->metric]);
+        $request->setCohortSpec($this->cohortSpec);
+        $result = $this->analytics->properties->runReport('properties/'.config('google-analytic.property_id'), $request);
+
+        if ($result) {
+            return $this->convert_google_result($result);
+        }
+
+        return false;
+    }
+}
