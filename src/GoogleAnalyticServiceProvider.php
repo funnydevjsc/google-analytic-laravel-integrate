@@ -48,12 +48,8 @@ class GoogleAnalyticServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../config/google-service.php', 'google-service'
         );
-        $this->app->singleton(\FunnyDev\GoogleAnalytic\GoogleAnalyticSdk::class, function ($app) {
-            $merchant = $app['config']['ninepay.merchant'];
-            $secret = $app['config']['ninepay.secret'];
-            $sum = $app['config']['ninepay.sum'];
-            $server = $app['config']['ninepay.server'];
-            return new \FunnyDev\GoogleAnalytic\GoogleAnalyticSdk($merchant, $secret, $sum, $server);
+        $this->app->singleton(\FunnyDev\GoogleAnalytic\GoogleAnalyticSdk::class, function () {
+            return new \FunnyDev\GoogleAnalytic\GoogleAnalyticSdk;
         });
     }
 }

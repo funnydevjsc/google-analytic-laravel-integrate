@@ -28,9 +28,9 @@ class GoogleAnalyticHelper
     /**
      * @throws \Exception
      */
-    public function __construct(string $metric='', string $dimension='', string $start_date='', string $end_date='')
+    public function __construct(string $metric='', string $dimension='', string $start_date='', string $end_date='', array $credentials=null, string $credentials_path=null)
     {
-        $service_client = new GoogleServiceClient();
+        $service_client = new GoogleServiceClient($credentials, $credentials_path);
         $this->analytics = new AnalyticsData($service_client->instance());
         if (!empty($dimension)) {
             $this->setDimension($dimension);
