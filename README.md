@@ -5,7 +5,7 @@ The free Laravel package to help you integrate data with GA4
 ## Use Cases
 
 - Crawl and parse result from GA4
-- Easy to save into DB and draw charts
+- Easy to understand and draw charts
 - Example crawler command
 
 ## Features
@@ -13,6 +13,10 @@ The free Laravel package to help you integrate data with GA4
 - Dynamic Google Service credentials from config/google-service.php
 - Dynamic Google Analytic properties from config/google-analytic.php
 - Easy to crawl data with a simple line code
+
+## Know issues
+
+- Cleanup dependencies from google/cloud and google/apiclient
 
 ## Requirements
 
