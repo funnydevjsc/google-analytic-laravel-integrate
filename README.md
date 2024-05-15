@@ -16,7 +16,7 @@ The free Laravel package to help you integrate data with GA4
 
 ## Know issues
 
-- Cleanup dependencies from google/cloud and google/apiclient
+This package uses the latest official SDK, libraries and methods from Google then it might be large for shared hosting. Please consider your server's environment before using this package.
 
 ## Requirements
 
