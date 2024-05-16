@@ -58,7 +58,7 @@ class GoogleAnalyticSdk
             'retention_rate' => [
                 'new' => [],
                 'returning' => [],
-                'active' => [],
+                'evolution' => [],
                 'engagement' => []
             ],
             'business' => [
@@ -187,8 +187,8 @@ class GoogleAnalyticSdk
         }
 
         $instance->setDimension('nthDay');
-        $instance->setMetric('activeUsers');
-        $param['retention_rate']['active'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
+        $instance->setMetric('totalUsers');
+        $param['retention_rate']['evolution'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
 
         $instance->setMetric('engagementRate');
         $param['retention_rate']['engagement'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
