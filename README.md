@@ -239,13 +239,13 @@ You can use or optimize <code>app/Console/Commands/GoogleAnalyticCommand.php</co
   "retention_rate": { //Calculate retention rate of users
     "new": "2592",
     "returning": "653",
-    "active": {
-      "2024-05-13": "75",
-      "2024-05-12": "71",
-      "2024-05-11": "60",
-      "2024-01-31": "14",
-      "2024-01-30": "9",
-      "2024-01-29": "4"
+    "evolution": {
+      "2024-05-13": "235",
+      "2024-05-12": "210",
+      "2024-05-11": "193",
+      "2024-01-31": "186",
+      "2024-01-30": "180",
+      "2024-01-29": "172"
     },
     "engagement": {
       "2024-05-13": "0.78125",
