@@ -54,7 +54,7 @@ If publishing files fails, please create corresponding files at the path `config
 
 <img src="screenshots/google-service-account-sample.png">
 
-- Then download it to your computer as <code>application_default_credentials.json</code> and move it to the storage_path of Laravel project.
+- Then download it to your computer as <code>application_default_credentials.json</code> and move it to the storage_path of Laravel project but don't forget to ignore it from git to secure your project.
 
 #### Step 5. Update the various config settings in the published config file:
 
