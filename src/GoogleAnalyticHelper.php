@@ -14,6 +14,7 @@ use Google\Service\AnalyticsData\RunReportRequest;
 
 class GoogleAnalyticHelper
 {
+    public string $property_id;
     public int $daysCount;
     public string $startDate;
     public string $endDate;
@@ -28,8 +29,13 @@ class GoogleAnalyticHelper
     /**
      * @throws \Exception
      */
-    public function __construct(string $metric='', string $dimension='', string $start_date='', string $end_date='', array $credentials=null, string $credentials_path=null)
+    public function __construct(string $property_id='', string $metric='', string $dimension='', string $start_date='', string $end_date='', array $credentials=null, string $credentials_path=null)
     {
+        if ($property_id !== '') {
+            $this->property_id = $property_id;
+        } else {
+            $this->property_id = config('google-analytic.property_id');
+        }
         $service_client = new GoogleServiceClient($credentials, $credentials_path);
         $this->analytics = new AnalyticsData($service_client->instance());
         if (!empty($dimension)) {
@@ -83,6 +89,7 @@ class GoogleAnalyticHelper
             $newData[$dateKey] = $value;
             $today->modify('-1 day');
         }
+        ksort($newData);
         return $newData;
     }
 
@@ -228,7 +235,7 @@ class GoogleAnalyticHelper
         $request->setDateRanges([$this->dateRange]);
         $request->setDimensions([$this->dimension]);
         $request->setMetrics([$this->metric]);
-        $result = $this->analytics->properties->runReport('properties/'.config('google-analytic.property_id'), $request);
+        $result = $this->analytics->properties->runReport('properties/'.$this->property_id, $request);
 
         if ($result) {
             return $this->convert_google_result($result);
@@ -251,7 +258,7 @@ class GoogleAnalyticHelper
         $request->setDimensions([$cohort_dimension, $this->dimension]);
         $request->setMetrics([$this->metric]);
         $request->setCohortSpec($this->cohortSpec);
-        $result = $this->analytics->properties->runReport('properties/'.config('google-analytic.property_id'), $request);
+        $result = $this->analytics->properties->runReport('properties/'.$this->property_id, $request);
 
         if ($result) {
             return $this->convert_google_result($result);
