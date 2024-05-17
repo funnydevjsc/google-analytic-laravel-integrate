@@ -55,7 +55,7 @@ class GoogleAnalyticSdk
                 'dau-wau' => [],
                 'wau-mau' => []
             ],
-            'retention_rate' => [
+            'retention-rate' => [
                 'new' => [],
                 'returning' => [],
                 'evolution' => [],
@@ -182,16 +182,16 @@ class GoogleAnalyticSdk
         $instance->setMetric('totalUsers');
         $data = $instance->getReport() ?? [];
         if ($data) {
-            $param['retention_rate']['new'] = $data['new'] ?? 0;
-            $param['retention_rate']['returning'] = $data['returning'] ?? 0;
+            $param['retention-rate']['new'] = $data['new'] ?? 0;
+            $param['retention-rate']['returning'] = $data['returning'] ?? 0;
         }
 
         $instance->setDimension('nthDay');
         $instance->setMetric('totalUsers');
-        $param['retention_rate']['evolution'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
+        $param['retention-rate']['evolution'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
 
         $instance->setMetric('engagementRate');
-        $param['retention_rate']['engagement'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
+        $param['retention-rate']['engagement'] = $instance->add_date_values($instance->getReport(), $instance->endDate) ?? [];
 
         $instance->setDimension('itemName');
         $instance->setMetric('itemsViewed');
