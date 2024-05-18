@@ -304,6 +304,12 @@ And some demo charts:
 
 <img src="screenshots/chart-demo-6.png">
 
+<img src="screenshots/chart-demo-7.png">
+
+<img src="screenshots/chart-demo-8.png">
+
+<img src="screenshots/chart-demo-9.png">
+
 <!--- ## Usage --->
 
 ## Testing
