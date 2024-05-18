@@ -4,7 +4,7 @@ The free Laravel package to help you integrate data with GA4
 
 ## Use Cases
 
-- Crawl and parse result from GA4
+- Crawl and parse result from GA4 with reformated and sorted values
 - Easy to understand and draw charts
 - Example crawler command
 
@@ -16,7 +16,9 @@ The free Laravel package to help you integrate data with GA4
 
 ## Know issues
 
-This package uses the latest official SDK, libraries and methods from Google then it might be large for shared hosting. Please consider your server's environment before using this package.
+- This package uses the latest official SDK, libraries and methods from Google then it might be large (around 30mb for dependency package google/apiclient) for shared hosting.
+- Please consider your server's environment before using this package.
+- However, we still recommend that you follow the latest writing style for Google libraries to ensure safety, compliance, CI/CD and most importantly if you are using services
 
 ## Requirements
 
