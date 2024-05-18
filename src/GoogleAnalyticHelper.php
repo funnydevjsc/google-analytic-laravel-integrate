@@ -226,19 +226,44 @@ class GoogleAnalyticHelper
         return $instance;
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function getReport(): array|bool
+    private function applySorting($result, $sortBy, $orderBy): array
     {
+        switch ($sortBy) {
+            case 'key':
+                $orderBy === 'desc' ? krsort($result) : ksort($result);
+                break;
+            case 'value':
+                $orderBy === 'desc' ? arsort($result) : asort($result);
+                break;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Retrieve and sort Google Analytic report data
+     *
+     * @param string $sortBy An optional parameter that determines the sorting of the report data. Can be "", "key", or "value". When "", no sorting is applied.
+     * @param string $orderBy An optional parameter that determines the order direction of the sorting. Can be "asc" or "desc". Default is "desc".
+     *
+     * @return array|bool Returns report data as an array if successful, or false if unsuccessful.
+     * @throws \Exception If $sortBy is neither "", "key", or "value".
+     *
+     */
+    public function getReport(string $sortBy = '', string $orderBy = 'desc'): array|bool
+    {
+        if (!in_array($sortBy, ['', 'key', 'value'])) {
+            throw new \Exception("Invalid sortBy value. It should be either '', 'key', or 'value'");
+        }
+
         $request = new RunReportRequest();
         $request->setDateRanges([$this->dateRange]);
         $request->setDimensions([$this->dimension]);
         $request->setMetrics([$this->metric]);
-        $result = $this->analytics->properties->runReport('properties/'.$this->property_id, $request);
+        $result = $this->analytics->properties->runReport('properties/' . $this->property_id, $request);
 
         if ($result) {
-            return $this->convert_google_result($result);
+            return $this->applySorting($this->convert_google_result($result), $sortBy, $orderBy);
         }
 
         return false;

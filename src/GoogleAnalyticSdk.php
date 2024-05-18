@@ -97,10 +97,10 @@ class GoogleAnalyticSdk
 
         $instance->setMetric('totalUsers');
         $instance->setDimension('countryId');
-        $param['users']['countries'] = $instance->getReport() ?? [];
+        $param['users']['countries'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('city');
-        $param['users']['cities'] = $instance->getReport() ?? [];
+        $param['users']['cities'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('userGender');
         $data = $instance->getReport() ?? false;
@@ -119,34 +119,34 @@ class GoogleAnalyticSdk
         }
 
         $instance->setDimension('language');
-        $param['users']['languages'] = $instance->getReport() ?? [];
+        $param['users']['languages'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('brandingInterest');
-        $param['users']['favorites'] = $instance->getReport() ?? [];
+        $param['users']['favorites'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('sessionDefaultChannelGroup');
-        $param['users']['channels'] = $instance->getReport() ?? [];
+        $param['users']['channels'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('deviceCategory');
-        $param['users']['devices']['types'] = $instance->getReport() ?? [];
+        $param['users']['devices']['types'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('mobileDeviceBranding');
-        $param['users']['devices']['brands'] = $instance->getReport() ?? [];
+        $param['users']['devices']['brands'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('mobileDeviceMarketingName');
-        $param['users']['devices']['names'] = $instance->getReport() ?? [];
+        $param['users']['devices']['names'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('mobileDeviceModel');
-        $param['users']['devices']['models'] = $instance->getReport() ?? [];
+        $param['users']['devices']['models'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('operatingSystem');
-        $param['users']['devices']['os'] = $instance->getReport() ?? [];
+        $param['users']['devices']['os'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('operatingSystemWithVersion');
-        $param['users']['devices']['versions'] = $instance->getReport() ?? [];
+        $param['users']['devices']['versions'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('browser');
-        $param['users']['devices']['browsers'] = $instance->getReport() ?? [];
+        $param['users']['devices']['browsers'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('nthDay');
         $instance->setMetric('sessionsPerUser');
@@ -160,13 +160,13 @@ class GoogleAnalyticSdk
 
         $instance->setDimension('sessionSource');
         $instance->setMetric('engagedSessions');
-        $param['interaction']['sources'] = $instance->getReport() ?? [];
+        $param['interaction']['sources'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('pageLocation');
-        $param['interaction']['pages'] = $instance->remove_query_keys($instance->getReport()) ?? [];
+        $param['interaction']['pages'] = $instance->remove_query_keys($instance->getReport(sortBy: 'value')) ?? [];
 
         $instance->setDimension('pageReferrer');
-        $param['interaction']['referrers'] = $instance->remove_query_keys($instance->getReport()) ?? [];
+        $param['interaction']['referrers'] = $instance->remove_query_keys($instance->getReport(sortBy: 'value')) ?? [];
 
         $instance->setDimension('nthDay');
         $instance->setMetric('dauPerMau');
@@ -195,20 +195,20 @@ class GoogleAnalyticSdk
 
         $instance->setDimension('itemName');
         $instance->setMetric('itemsViewed');
-        $param['business']['products']['viewed'] = $instance->getReport() ?? [];
+        $param['business']['products']['viewed'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setMetric('itemsAddedToCart');
-        $param['business']['products']['added'] = $instance->getReport() ?? [];
+        $param['business']['products']['added'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setMetric('itemsPurchased');
-        $param['business']['products']['purchased'] = $instance->getReport() ?? [];
+        $param['business']['products']['purchased'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setMetric('itemRevenue');
-        $param['business']['products']['revenue'] = $instance->getReport() ?? [];
+        $param['business']['products']['revenue'] = $instance->getReport(sortBy: 'value') ?? [];
 
         $instance->setDimension('itemPromotionName');
         $instance->setMetric('itemsViewedInPromotion');
-        $param['business']['promotion'] = $instance->getReport() ?? [];
+        $param['business']['promotion'] = $instance->getReport(sortBy: 'value') ?? [];
 
         return $param;
     }
