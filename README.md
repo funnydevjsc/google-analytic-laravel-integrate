@@ -236,7 +236,7 @@ You can use or optimize <code>app/Console/Commands/GoogleAnalyticCommand.php</co
       "2024-01-29": "0.13877551020408163"
     }
   },
-  "retention_rate": { //Calculate retention rate of users
+  "retention-rate": { //Calculate retention rate of users
     "new": "2592",
     "returning": "653",
     "evolution": {
@@ -289,6 +289,20 @@ You can use or optimize <code>app/Console/Commands/GoogleAnalyticCommand.php</co
   }
 }
 ```
+
+And some demo charts:
+
+<img src="screenshots/chart-demo-1.png">
+
+<img src="screenshots/chart-demo-2.png">
+
+<img src="screenshots/chart-demo-3.png">
+
+<img src="screenshots/chart-demo-4.png">
+
+<img src="screenshots/chart-demo-5.png">
+
+<img src="screenshots/chart-demo-6.png">
 
 <!--- ## Usage --->
 
