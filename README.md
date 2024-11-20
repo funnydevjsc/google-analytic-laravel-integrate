@@ -324,6 +324,9 @@ Crawl data from Google Analytic
 php artisan google-analytic:crawl
 ```
 
+Sync client_id 
+
+
 Send view_item event of authenticated user to Google Analytic
 
 ``` php
