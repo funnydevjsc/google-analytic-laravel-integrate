@@ -15,13 +15,13 @@ class GoogleAnalyticCommand extends Command
     /**
      * @throws \Exception
      */
-    private function fetchAnalyticDataAndSave(GoogleAnalyticSdk $analytics, callable $dateModifier): array
+    private function fetchAnalyticDataAndSave(callable $dateModifier): array
     {
         $today = Carbon::now();
         $end_date = $today->format('Y-m-d');
         $start_date = $dateModifier($today)->format('Y-m-d');
 
-        return $analytics->getReport(start_date: $start_date, end_date: $end_date);
+        return GoogleAnalyticSdk::getReport(start_date: $start_date, end_date: $end_date);
     }
 
     /**
@@ -29,10 +29,9 @@ class GoogleAnalyticCommand extends Command
      */
     public function handle(): void
     {
-        $analytics = new GoogleAnalyticSdk();
-        $analyticsData_1d = $this->fetchAnalyticDataAndSave($analytics, fn($today) => $today->subDay());
-        $analyticsData_7d = $this->fetchAnalyticDataAndSave($analytics, fn($today) => $today->subWeek());
-        $analyticsData_28d = $this->fetchAnalyticDataAndSave($analytics, fn($today) => $today->subMonth());
-        $analyticsData_360d = $this->fetchAnalyticDataAndSave($analytics, fn($today) => $today->subYear());
+        $analyticsData_1d = $this->fetchAnalyticDataAndSave(fn($today) => $today->subDay());
+        $analyticsData_7d = $this->fetchAnalyticDataAndSave(fn($today) => $today->subWeek());
+        $analyticsData_28d = $this->fetchAnalyticDataAndSave(fn($today) => $today->subMonth());
+        $analyticsData_360d = $this->fetchAnalyticDataAndSave(fn($today) => $today->subYear());
     }
 }

@@ -2,12 +2,9 @@
 
 namespace FunnyDev\GoogleAnalytic;
 
-use App\Http\Middleware\GoogleAnalyticMiddleware;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 class GoogleAnalyticServiceProvider extends ServiceProvider
 {
@@ -21,6 +18,7 @@ class GoogleAnalyticServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/google-analytic.php' => config_path('google-analytic.php'),
             __DIR__.'/../config/google-service.php' => config_path('google-service.php'),
+            __DIR__ . '/../resources/views/google-analytics' => resource_path('views/vendor/google-analytics'),
             __DIR__.'/../app/Console/Commands/GoogleAnalyticCommand.php' => app_path('Console/Commands/GoogleAnalyticCommand.php')
         ], 'google-analytic');
 

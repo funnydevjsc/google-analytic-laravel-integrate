@@ -7,12 +7,14 @@ The free Laravel package to help you integrate data with GA4
 - Crawl and parse result from GA4 with reformated and sorted values
 - Easy to understand and draw charts
 - Example crawler command
+- Send data to Google Analytics by Measurement Protocol.
 
 ## Features
 
 - Dynamic Google Service credentials from config/google-service.php
 - Dynamic Google Analytic properties from config/google-analytic.php
 - Easy to crawl data with a simple line code
+- Easy to sync your users or products and orders to Google Analytics.
 
 ## Know issues
 
@@ -316,8 +318,56 @@ And some demo charts:
 
 ## Testing
 
+Crawl data from Google Analytic
+
 ``` bash
 php artisan google-analytic:crawl
+```
+
+Send view_item event of authenticated user to Google Analytic
+
+``` php
+namespace App\Listeners\Product;
+
+use App\Events\Product\ViewProductEvent;
+use FunnyDev\GoogleAnalytic\GoogleAnalyticSdk;
+
+class ViewProductListener
+{
+    /**
+     * Handle the event.
+     * @throws \Exception
+     */
+    public function handle(ViewProductEvent $event): void
+    {
+        $product = $event->product;
+        $price = floatval($product->amount);
+        $discount = match ($product->quantity) {
+            6 => $price,
+            12 => $price * 2,
+            default => 0
+        };
+        $param = [
+            [
+                'item_id' => $product->id.'_'.$product->quantity,
+                'item_name' => $product->name,
+                'price' => $price,
+                'value' => ($price * $product->quantity) - $discount,
+                'currency' => 'USD',
+                'item_brand' => $product->name,
+                'item_category' => $product->type,
+                'item_variant' => ($product->type == 'Software') ? 'license' : 'script',
+                'quantity' => $product->quantity,
+                'discount' => floatval($discount)
+            ]
+        ];
+        GoogleAnalyticSdk::sendReport(
+            client_id: $event->user->id,
+            event_name: 'view_item',
+            even_param: $param
+        );
+    }
+}
 ```
 
 ## Feedback

@@ -12,7 +12,7 @@ use Google\Service\AnalyticsData\CohortSpec;
 use Google\Service\AnalyticsData\CohortsRange;
 use Google\Service\AnalyticsData\RunReportRequest;
 
-class GoogleAnalyticHelper
+class GoogleAnalyticReportHelper
 {
     public string $property_id;
     public int $daysCount;
