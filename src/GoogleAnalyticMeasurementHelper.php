@@ -36,19 +36,19 @@ class GoogleAnalyticMeasurementHelper
     /**
      * @throws \Exception
      */
-    public function send(string $client_id='', string $event_name='custom', array $even_param=[]): bool
+    public function send(string $client_id='', string $name='custom', array $params=[]): bool
     {
         $payload = [
             'events' => [
                 [
-                    'name' => $event_name,
-                    'params' => $even_param
+                    'name' => $name,
+                    'params' => $params
                 ],
             ]
         ];
 
         if (!empty($client_id)) {
-            $payload = array_merge($payload, ['client_id' => $client_id]);
+            $payload = array_merge($payload, ['client_id' => $client_id, 'user_properties' => ['user_id' => $client_id]]);
         }
 
         $response = Http::post($this->endpoint, $payload);

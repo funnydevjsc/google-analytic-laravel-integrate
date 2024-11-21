@@ -366,8 +366,8 @@ class ViewProductListener
         ];
         GoogleAnalyticSdk::sendReport(
             client_id: $event->user->id,
-            event_name: 'view_item',
-            even_param: $param
+            name: 'view_item',
+            params: $param
         );
     }
 }
