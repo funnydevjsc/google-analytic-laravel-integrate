@@ -216,9 +216,9 @@ class GoogleAnalyticSdk
     /**
      * @throws \Exception
      */
-    public static function sendReport(string $client_id='', string $name='custom', array $params=[], string $measurement_id='', string $measurement_secret_key='', array $credentials=null, string $credentials_path=null): bool
+    public static function sendReport(string $client_id='', string $name='custom', array $params=[], string $measurement_id='', string $measurement_api_secret='', array $credentials=null, string $credentials_path=null): bool
     {
-        $instance = new GoogleAnalyticMeasurementHelper(measurement_id: $measurement_id, measurement_secret_key: $measurement_secret_key, credentials: $credentials, credentials_path: $credentials_path);
+        $instance = new GoogleAnalyticMeasurementHelper(measurement_id: $measurement_id, measurement_api_secret: $measurement_api_secret, credentials: $credentials, credentials_path: $credentials_path);
         return $instance->send($client_id, $name, $params);
     }
 }

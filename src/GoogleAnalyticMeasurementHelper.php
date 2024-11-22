@@ -8,13 +8,13 @@ class GoogleAnalyticMeasurementHelper
 {
     public string $endpoint;
     public string $measurement_id;
-    public string $measurement_secret_key;
+    public string $measurement_api_secret;
     public GoogleServiceClient $client;
 
     /**
      * @throws \Exception
      */
-    public function __construct(string $measurement_id='', string $measurement_secret_key='', array $credentials=null, string $credentials_path=null)
+    public function __construct(string $measurement_id='', string $measurement_api_secret='', array $credentials=null, string $credentials_path=null)
     {
         if ($measurement_id !== '') {
             $this->measurement_id = $measurement_id;
@@ -22,13 +22,13 @@ class GoogleAnalyticMeasurementHelper
             $this->measurement_id = config('google-analytic.measurement_id');
         }
 
-        if ($measurement_secret_key !== '') {
-            $this->measurement_secret_key = $measurement_secret_key;
+        if ($measurement_api_secret !== '') {
+            $this->measurement_api_secret = $measurement_api_secret;
         } else {
-            $this->measurement_secret_key = config('google-analytic.measurement_secret_key');
+            $this->measurement_api_secret = config('google-analytic.measurement_api_secret');
         }
 
-        $this->endpoint = 'https://www.google-analytics.com/mp/collect' . '?' . http_build_query(['measurement_id' => $this->measurement_id, 'api_secret' => $this->measurement_secret_key]);
+        $this->endpoint = 'https://www.google-analytics.com/mp/collect' . '?' . http_build_query(['measurement_id' => $this->measurement_id, 'api_secret' => $this->measurement_api_secret]);
 
         $this->client = new GoogleServiceClient($credentials, $credentials_path);
     }
