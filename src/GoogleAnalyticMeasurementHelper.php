@@ -48,7 +48,7 @@ class GoogleAnalyticMeasurementHelper
         ];
 
         if (!empty($client_id)) {
-            $payload = array_merge($payload, ['client_id' => $client_id, 'user_properties' => ['user_id' => $client_id]]);
+            $payload = array_merge($payload, ['client_id' => $client_id, 'user_data' => ['user_id' => $client_id]]);
         }
 
         $response = Http::post($this->endpoint, $payload);
