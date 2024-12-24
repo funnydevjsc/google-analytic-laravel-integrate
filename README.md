@@ -324,8 +324,63 @@ Crawl data from Google Analytic
 php artisan google-analytic:crawl
 ```
 
-Sync client_id 
+Create based Controller
+``` php
+namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
+use Spatie\GoogleTagManager\GoogleTagManager;
+
+abstract class Controller
+{
+    public function __construct() {
+        if (Auth::check()) {
+            app(GoogleTagManager::class)->set('client_id', Auth::user()->uuid); // type of client_id must be an unique uuid v4
+            
+            $param = [
+                'user_id' => Auth::user()->_id,
+                'sha256_email_address' => hash('sha256', Auth::user()->email),
+                'sha256_phone_number' => Auth::user()->phone ? hash('sha256', Auth::user()->dial_code . Auth::user()->phone) : '',
+                'address.sha256_first_name' => hash('sha256', Auth::user()->first_name),
+                'address.sha256_last_name' => hash('sha256', Auth::user()->last_name)
+            ];
+            
+            if ($this->valid(Auth::user()->state)) {
+                $param['address.region'] = Auth::user()->state;
+            }
+            
+            if ($this->valid(Auth::user()->country)) {
+                $param['address.country'] = Auth::user()->country;
+            }
+            
+            app(GoogleTagManager::class)->set('user_data', $param);
+        }
+    }
+}
+```
+
+Sync client_id 
+``` bladehtml
+<script>
+    @if($clientId)
+    function updateGAClientId(newClientId) {
+        const cookies = document.cookie.split('; ');
+        let gaCookie = cookies.find(cookie => cookie.startsWith('_ga='));
+        if (!gaCookie) {
+            return;
+        }
+        const parts = gaCookie.split('=');
+        if (parts.length <= 1) {
+            return;
+        }
+        const cookieValue = parts[1];
+        const newGaCookieValue = cookieValue.replace(/(GA\d+\.\d+\.)\d+\.\d+/, `$1${newClientId}`);
+        document.cookie = `_ga=${newGaCookieValue}; path=/; SameSite=Lax`;
+    }
+    updateGAClientId('{{ $clientId }}');
+    @endif
+</script>
+```
 
 Send view_item event of authenticated user to Google Analytic
 
