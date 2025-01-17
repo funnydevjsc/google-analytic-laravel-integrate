@@ -32,6 +32,8 @@ class GoogleAnalyticMiddleware
                 $param['address.country'] = Auth::user()->country;
             }
             app(GoogleTagManager::class)->set('user_data', $param);
+            Session::put('userData', $param);
+            Session::put('clientId', Auth::user()->uuid);
         }
 
         return $next($request);

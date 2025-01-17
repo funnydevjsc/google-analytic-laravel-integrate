@@ -97,11 +97,42 @@ class Kernel extends HttpKernel
 }
 ```
 
-#### Step 7. Migrate your Analytic Property ID with your Front End:
+#### Step 7. Add based view controller:
+
+###### app/Providers/AppServiceProvider.php
+
+```php
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    ...
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        ...
+        View::addNamespace('google-analytics', base_path('resources/views/vendor/google-analytics'));
+        View::share('clientId', Session::get('clientId') ?? '');
+        View::share('userData', Session::get('userData') ?? '');
+    }
+}
+```
+
+#### Step 8. Migrate your Analytic Property ID with your Front End:
 
 You can use libraries such as <code>spatie/laravel-googletagmanager</code> to set up GA4 for Front End of the website then declare events and activities of users and businesses using Javascript to trigger those events and send reports to GA.
 
-#### Step 8. Save data to Database and Draw charts:
+#### Step 9. Save data to Database and Draw charts:
 
 You can use or optimize <code>app/Console/Commands/GoogleAnalyticCommand.php</code> to retrieve data and store the collected data into the Database for convenience in research, evaluation and drawing charts. Drawing charts is possible through Javascript libraries. Example collected data like this (this data bellow is not real and just for demo only):
 
@@ -353,25 +384,16 @@ php artisan google-analytic:crawl
 
 Sync client_id 
 ``` bladehtml
-@if($clientId)
-    script>
-        function updateGAClientId(newClientId) {
-            const cookies = document.cookie.split('; ');
-            let gaCookie = cookies.find(cookie => cookie.startsWith('_ga='));
-            if (!gaCookie) {
-                return;
-            }
-            const parts = gaCookie.split('=');
-            if (parts.length <= 1) {
-                return;
-            }
-            const cookieValue = parts[1];
-            const newGaCookieValue = cookieValue.replace(/(GA\d+\.\d+\.)\d+\.\d+/, `$1${newClientId}`);
-            document.cookie = `_ga=${newGaCookieValue}; path=/; SameSite=Lax`;
-        }
-        updateGAClientId('{{ $clientId }}');
-    </script>
-@endif
+<head>
+    @include('googletagmanager::head')
+    ...
+</head>
+<body>
+    @include('googletagmanager::body')
+    @include('google-analytics::sync_client_id')
+    ...
+    @include('google-analytics::scripts')
+</body>
 ```
 
 Send view_item event of authenticated user to Google Analytic

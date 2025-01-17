@@ -1,4 +1,4 @@
-@if($clientId)
+@if($clientId ?? '')
     <script>
         function updateGAClientId(newClientId) {
             const cookies = document.cookie.split('; ');
@@ -15,5 +15,12 @@
             document.cookie = `_ga=${newGaCookieValue}; path=/; SameSite=Lax`;
         }
         updateGAClientId('{{ $clientId }}');
+    </script>
+@endif
+
+@if($userData ?? '')
+    <script>
+        if (typeof window.dataLayer === 'undefined') { window.dataLayer = dataLayer ?? []; }
+        window.dataLayer.push(@json($userData));
     </script>
 @endif
