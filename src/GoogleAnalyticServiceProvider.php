@@ -19,6 +19,7 @@ class GoogleAnalyticServiceProvider extends ServiceProvider
             __DIR__.'/../config/google-analytic.php' => config_path('google-analytic.php'),
             __DIR__.'/../config/google-service.php' => config_path('google-service.php'),
             __DIR__ . '/../resources/views/google-analytics' => resource_path('views/vendor/google-analytics'),
+            __DIR__.'/../app/Http/Middleware/GoogleAnalyticMiddleware.php' => app_path('Http/Middleware/GoogleAnalyticMiddleware.php'),
             __DIR__.'/../app/Console/Commands/GoogleAnalyticCommand.php' => app_path('Console/Commands/GoogleAnalyticCommand.php')
         ], 'google-analytic');
 

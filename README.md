@@ -68,13 +68,40 @@ If publishing files fails, please create corresponding files at the path `config
 
 <img src="screenshots/google-analytic-dashboard-sample.png">
 
-- Then in this case our Analytic Property ID is <code>281673130</code> which was showed on the current URL.
+- Then in this case our Analytic Property ID is <code>281673130</code> which was shown on the current URL.
 
-#### Step 6. Migrate your Analytic Property ID with your Front End:
+#### Step 6. Add middleware protection:
+
+###### app/Http/Kernel.php
+
+```php
+<?php
+
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
+class Kernel extends HttpKernel
+{
+    // Other kernel properties...
+    
+    /**
+     * The application's route middleware groups.
+     *
+     * @var array
+     */
+    protected $routeMiddleware = [
+        // Other middlewares...
+         'google-analytic' => 'App\Http\Middleware\GoogleAnalyticMiddleware',
+    ];
+}
+```
+
+#### Step 7. Migrate your Analytic Property ID with your Front End:
 
 You can use libraries such as <code>spatie/laravel-googletagmanager</code> to set up GA4 for Front End of the website then declare events and activities of users and businesses using Javascript to trigger those events and send reports to GA.
 
-#### Step 7. Save data to Database and Draw charts:
+#### Step 8. Save data to Database and Draw charts:
 
 You can use or optimize <code>app/Console/Commands/GoogleAnalyticCommand.php</code> to retrieve data and store the collected data into the Database for convenience in research, evaluation and drawing charts. Drawing charts is possible through Javascript libraries. Example collected data like this (this data bellow is not real and just for demo only):
 
@@ -324,62 +351,27 @@ Crawl data from Google Analytic
 php artisan google-analytic:crawl
 ```
 
-Create based Controller
-``` php
-namespace App\Http\Controllers;
-
-use Illuminate\Support\Facades\Auth;
-use Spatie\GoogleTagManager\GoogleTagManager;
-
-abstract class Controller
-{
-    public function __construct() {
-        if (Auth::check()) {
-            app(GoogleTagManager::class)->set('client_id', Auth::user()->uuid); // type of client_id must be an unique uuid v4
-            
-            $param = [
-                'user_id' => Auth::user()->_id,
-                'sha256_email_address' => hash('sha256', Auth::user()->email),
-                'sha256_phone_number' => Auth::user()->phone ? hash('sha256', Auth::user()->dial_code . Auth::user()->phone) : '',
-                'address.sha256_first_name' => hash('sha256', Auth::user()->first_name),
-                'address.sha256_last_name' => hash('sha256', Auth::user()->last_name)
-            ];
-            
-            if ($this->valid(Auth::user()->state)) {
-                $param['address.region'] = Auth::user()->state;
-            }
-            
-            if ($this->valid(Auth::user()->country)) {
-                $param['address.country'] = Auth::user()->country;
-            }
-            
-            app(GoogleTagManager::class)->set('user_data', $param);
-        }
-    }
-}
-```
-
 Sync client_id 
 ``` bladehtml
-<script>
-    @if($clientId)
-    function updateGAClientId(newClientId) {
-        const cookies = document.cookie.split('; ');
-        let gaCookie = cookies.find(cookie => cookie.startsWith('_ga='));
-        if (!gaCookie) {
-            return;
+@if($clientId)
+    script>
+        function updateGAClientId(newClientId) {
+            const cookies = document.cookie.split('; ');
+            let gaCookie = cookies.find(cookie => cookie.startsWith('_ga='));
+            if (!gaCookie) {
+                return;
+            }
+            const parts = gaCookie.split('=');
+            if (parts.length <= 1) {
+                return;
+            }
+            const cookieValue = parts[1];
+            const newGaCookieValue = cookieValue.replace(/(GA\d+\.\d+\.)\d+\.\d+/, `$1${newClientId}`);
+            document.cookie = `_ga=${newGaCookieValue}; path=/; SameSite=Lax`;
         }
-        const parts = gaCookie.split('=');
-        if (parts.length <= 1) {
-            return;
-        }
-        const cookieValue = parts[1];
-        const newGaCookieValue = cookieValue.replace(/(GA\d+\.\d+\.)\d+\.\d+/, `$1${newClientId}`);
-        document.cookie = `_ga=${newGaCookieValue}; path=/; SameSite=Lax`;
-    }
-    updateGAClientId('{{ $clientId }}');
-    @endif
-</script>
+        updateGAClientId('{{ $clientId }}');
+    </script>
+@endif
 ```
 
 Send view_item event of authenticated user to Google Analytic
