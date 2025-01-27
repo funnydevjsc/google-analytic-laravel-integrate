@@ -9,7 +9,6 @@ class GoogleAnalyticMeasurementHelper
     public string $endpoint;
     public string $measurement_id;
     public string $measurement_api_secret;
-    public GoogleServiceClient $client;
 
     /**
      * @throws \Exception
@@ -29,8 +28,6 @@ class GoogleAnalyticMeasurementHelper
         }
 
         $this->endpoint = 'https://www.google-analytics.com/mp/collect' . '?' . http_build_query(['measurement_id' => $this->measurement_id, 'api_secret' => $this->measurement_api_secret]);
-
-        $this->client = new GoogleServiceClient($credentials, $credentials_path);
     }
 
     /**

@@ -3,6 +3,9 @@
 namespace FunnyDev\GoogleAnalytic;
 
 use DateTime;
+use FunnyDev\GoogleClient\GoogleServiceClient;
+use Google\Client;
+use Google\Service\Analytics;
 use Google\Service\AnalyticsData;
 use Google\Service\AnalyticsData\DateRange;
 use Google\Service\AnalyticsData\Dimension;
@@ -20,6 +23,7 @@ class GoogleAnalyticReportHelper
     public string $endDate;
     public DateRange $dateRange;
     public AnalyticsData $analytics;
+    public Client $client;
     public Dimension $dimension;
     public Metric $metric;
     public Cohort $cohort;
@@ -28,6 +32,7 @@ class GoogleAnalyticReportHelper
 
     /**
      * @throws \Exception
+     * @throws \Google\Service\Exception
      */
     public function __construct(string $property_id='', string $metric='', string $dimension='', string $start_date='', string $end_date='', array $credentials=null, string $credentials_path=null)
     {
@@ -36,8 +41,9 @@ class GoogleAnalyticReportHelper
         } else {
             $this->property_id = config('google-analytic.property_id');
         }
-        $service_client = new GoogleServiceClient($credentials, $credentials_path);
-        $this->analytics = new AnalyticsData($service_client->instance());
+        $this->client = (new GoogleServiceClient($credentials, $credentials_path))->instance();
+        $this->client->addScope(Analytics::ANALYTICS);
+        $this->analytics = new AnalyticsData($this->client);
         if (!empty($dimension)) {
             $this->setDimension($dimension);
         }
@@ -54,6 +60,7 @@ class GoogleAnalyticReportHelper
 
     /**
      * @throws \Exception
+     * @throws \Google\Service\Exception
      */
     public function convert_days_to_date($days, $startDate): string
     {
@@ -64,6 +71,7 @@ class GoogleAnalyticReportHelper
 
     /**
      * @throws \Exception
+     * @throws \Google\Service\Exception
      */
     public function convert_date_keys($data, $startDate): array
     {
@@ -78,6 +86,7 @@ class GoogleAnalyticReportHelper
 
     /**
      * @throws \Exception
+     * @throws \Google\Service\Exception
      */
     public function add_date_values($data, $endDate): array
     {
@@ -169,6 +178,10 @@ class GoogleAnalyticReportHelper
         return $results;
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Google\Service\Exception
+     */
     public function setDateRange(string $start_date='yesterday', string $end_date='today'): DateRange
     {
         $dateRange = new DateRange();
@@ -178,6 +191,10 @@ class GoogleAnalyticReportHelper
         return $dateRange;
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Google\Service\Exception
+     */
     public function setMetric(string $metric): Metric
     {
         $instance = new Metric();
@@ -186,6 +203,10 @@ class GoogleAnalyticReportHelper
         return $instance;
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Google\Service\Exception
+     */
     public function setDimension(string $dimension): Dimension
     {
         $instance = new Dimension();
@@ -194,6 +215,10 @@ class GoogleAnalyticReportHelper
         return $instance;
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Google\Service\Exception
+     */
     public function setCohort(): Cohort
     {
         $instance = new Cohort();
@@ -206,6 +231,7 @@ class GoogleAnalyticReportHelper
 
     /**
      * @throws \Exception
+     * @throws \Google\Service\Exception
      */
     public function setCohortRange(): CohortsRange
     {
@@ -217,6 +243,10 @@ class GoogleAnalyticReportHelper
         return $instance;
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Google\Service\Exception
+     */
     public function setCohortSpec(): CohortSpec
     {
         $instance = new CohortSpec();
@@ -248,6 +278,7 @@ class GoogleAnalyticReportHelper
      *
      * @return array|bool Returns report data as an array if successful, or false if unsuccessful.
      * @throws \Exception If $sortBy is neither "", "key", or "value".
+     * @throws \Google\Service\Exception
      *
      */
     public function getReport(string $sortBy = '', string $orderBy = 'desc'): array|bool
@@ -271,6 +302,7 @@ class GoogleAnalyticReportHelper
 
     /**
      * @throws \Exception
+     * @throws \Google\Service\Exception
      */
     public function getCohortReport(): array|bool
     {
