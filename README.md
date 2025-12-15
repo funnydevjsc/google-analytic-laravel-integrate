@@ -27,6 +27,15 @@ The free Laravel package to help you integrate data with GA4
 - **PHP**: 8.1 or higher
 - **Laravel** 9.0 or higher
 
+## Testing
+
+Run unit tests for this package:
+
+```bash
+composer install
+./vendor/bin/phpunit
+```
+
 ## Quick Start
 
 If you prefer to install this package into your own Laravel application, please follow the installation steps below

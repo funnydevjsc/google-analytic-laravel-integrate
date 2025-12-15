@@ -9,6 +9,11 @@
             "FunnyDev\\GoogleAnalytic\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "FunnyDev\\GoogleAnalytic\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Funny dev., Jsc",
@@ -26,12 +31,22 @@
         "illuminate/support": "^8.83",
         "illuminate/http": "^8.83",
         "illuminate/routing": "^8.83",
-        "illuminate/console": "^8.83"
+        "illuminate/console": "^8.83",
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^6.0",
+        "phpunit/phpunit": "^9.6"
     },
     "extra": {
         "laravel": {
             "providers": [
                 "FunnyDev\\GoogleAnalytic\\GoogleAnalyticServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "audit": {
+            "ignore": [
+                "PKSA-8qx3-n5y5-vvnd"
             ]
         }
     },
