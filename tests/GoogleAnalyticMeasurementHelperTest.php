@@ -65,4 +65,53 @@ class GoogleAnalyticMeasurementHelperTest extends TestCase
             return true;
         });
     }
+
+    public function test_send_adds_user_properties_when_provided(): void
+    {
+        Http::fake(fn () => Http::response('', 204));
+
+        $helper = new GoogleAnalyticMeasurementHelper('G-TEST', 'secret');
+        $ok = $helper->send(
+            '123.456',
+            'custom',
+            ['x' => 1],
+            'user-1',
+            false,
+            [
+                'customer_type' => 'paid',
+                'plan' => ['value' => 'pro'],
+                'empty' => '',
+            ]
+        );
+
+        $this->assertTrue($ok);
+
+        Http::assertSent(function (Request $request) {
+            $data = $request->data();
+            $this->assertSame(['value' => 'paid'], $data['user_properties']['customer_type'] ?? null);
+            $this->assertSame(['value' => 'pro'], $data['user_properties']['plan'] ?? null);
+            $this->assertArrayNotHasKey('empty', $data['user_properties'] ?? []);
+            return true;
+        });
+    }
+
+    public function test_send_uses_debug_endpoint_when_enabled(): void
+    {
+        Http::fake(fn () => Http::response(['validationMessages' => []], 200));
+
+        $helper = new GoogleAnalyticMeasurementHelper('G-TEST', 'secret');
+        $ok = $helper->send('123.456', 'custom', ['x' => 1], null, true, [], null, true);
+
+        $this->assertTrue($ok);
+
+        Http::assertSent(function (Request $request) {
+            $this->assertSame(
+                'https://www.google-analytics.com/debug/mp/collect?measurement_id=G-TEST&api_secret=secret',
+                $request->url()
+            );
+            $data = $request->data();
+            $this->assertSame(true, $data['events'][0]['params']['debug_mode'] ?? null);
+            return true;
+        });
+    }
 }

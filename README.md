@@ -131,7 +131,6 @@ class AppServiceProvider extends ServiceProvider
     {
         ...
         View::addNamespace('google-analytics', base_path('resources/views/vendor/google-analytics'));
-        View::share('clientId', Session::get('clientId') ?? '');
         View::share('userData', Session::get('userData') ?? '');
     }
 }
@@ -391,7 +390,7 @@ Crawl data from Google Analytic
 php artisan google-analytic:crawl
 ```
 
-Sync client_id 
+Sync GA4 client_id (read-only)
 ``` bladehtml
 <head>
     @include('googletagmanager::head')
@@ -428,13 +427,11 @@ class ViewProductListener
             12 => $price * 2,
             default => 0
         };
-        $param = [
+        $items = [
             [
                 'item_id' => $product->id.'_'.$product->quantity,
                 'item_name' => $product->name,
                 'price' => $price,
-                'value' => ($price * $product->quantity) - $discount,
-                'currency' => 'USD',
                 'item_brand' => $product->name,
                 'item_category' => $product->type,
                 'item_variant' => ($product->type == 'Software') ? 'license' : 'script',
@@ -442,10 +439,20 @@ class ViewProductListener
                 'discount' => floatval($discount)
             ]
         ];
+
+        [$clientId, $userId] = GoogleAnalyticSdk::resolveIdsFromRequest();
+        $userProperties = GoogleAnalyticSdk::resolveUserPropertiesFromRequest();
+
         GoogleAnalyticSdk::sendReport(
-            client_id: $event->user->id,
+            client_id: $clientId,
+            user_id: $userId,
             name: 'view_item',
-            params: $param
+            params: [
+                'currency' => 'USD',
+                'value' => ($price * $product->quantity) - $discount,
+                'items' => $items,
+            ],
+            user_properties: $userProperties,
         );
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Spatie\GoogleTagManager\GoogleTagManager;
 
 class GoogleAnalyticMiddleware
@@ -11,29 +12,24 @@ class GoogleAnalyticMiddleware
     public function handle($request, Closure $next)
     {
         if (Auth::check()) {
-            app(GoogleTagManager::class)->set('client_id', Auth::user()->uuid);
-            $param = [
-                'user_id' => Auth::user()->uuid,
-                'sha256_email_address' => hash('sha256', Auth::user()->email)
-            ];
-            if (Auth::user()->phone_number) {
-                $param['sha256_phone_number'] = hash('sha256', Auth::user()->phone_number);
+            $user = Auth::user();
+            $userId = $user->uuid ?? $user->id ?? null;
+            if ($userId !== null) {
+                $userId = (string) $userId;
             }
-            if (Auth::user()->first_name) {
-                $param['address.sha256_first_name'] = hash('sha256', Auth::user()->first_name);
+
+            // GA4: use user_id (stable, non-PII) for cross-device reporting/audiences.
+            if (!empty($userId)) {
+                app(GoogleTagManager::class)->set('ga_user_id', $userId);
+                Session::put('gaUserId', $userId);
             }
-            if (Auth::user()->last_name) {
-                $param['address.sha256_last_name'] = hash('sha256', Auth::user()->last_name);
+
+            // GA4: user_properties should be non-PII. Provide via config mapping/callback.
+            $userProperties = \FunnyDev\GoogleAnalytic\GoogleAnalyticSdk::resolveUserPropertiesFromRequest();
+            if (!empty($userProperties)) {
+                app(GoogleTagManager::class)->set('ga_user_properties', $userProperties);
+                Session::put('gaUserProperties', $userProperties);
             }
-            if (Auth::user()->region) {
-                $param['address.region'] = Auth::user()->region;
-            }
-            if (Auth::user()->country) {
-                $param['address.country'] = Auth::user()->country;
-            }
-            app(GoogleTagManager::class)->set('user_data', $param);
-            Session::put('userData', $param);
-            Session::put('clientId', Auth::user()->uuid);
         }
 
         return $next($request);

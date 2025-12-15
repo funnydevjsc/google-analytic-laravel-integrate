@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 class GoogleAnalyticMeasurementHelper
 {
     public string $endpoint;
+    public string $debugEndpoint;
     public string $measurement_id;
     public string $measurement_api_secret;
 
@@ -27,13 +28,24 @@ class GoogleAnalyticMeasurementHelper
             $this->measurement_api_secret = config('google-analytic.measurement_api_secret');
         }
 
-        $this->endpoint = 'https://www.google-analytics.com/mp/collect' . '?' . http_build_query(['measurement_id' => $this->measurement_id, 'api_secret' => $this->measurement_api_secret]);
+        $query = http_build_query(['measurement_id' => $this->measurement_id, 'api_secret' => $this->measurement_api_secret]);
+        $this->endpoint = 'https://www.google-analytics.com/mp/collect' . '?' . $query;
+        $this->debugEndpoint = 'https://www.google-analytics.com/debug/mp/collect' . '?' . $query;
     }
 
     /**
      * @throws \Exception
      */
-    public function send(string $client_id = '', string $name = 'custom', array $params = [], ?string $user_id = null, bool $debug = false): bool
+    public function send(
+        string $client_id = '',
+        string $name = 'custom',
+        array $params = [],
+        ?string $user_id = null,
+        bool $debug = false,
+        array $user_properties = [],
+        ?int $timestamp_micros = null,
+        bool $use_debug_endpoint = false,
+    ): bool
     {
         // Build event payload
         $eventParams = $params;
@@ -49,6 +61,27 @@ class GoogleAnalyticMeasurementHelper
                 ],
             ],
         ];
+
+        if ($timestamp_micros !== null) {
+            $payload['timestamp_micros'] = $timestamp_micros;
+        }
+
+        if (!empty($user_properties)) {
+            $normalizedUserProperties = [];
+            foreach ($user_properties as $key => $value) {
+                if ($value === null || $value === '') {
+                    continue;
+                }
+                if (is_array($value) && array_key_exists('value', $value)) {
+                    $normalizedUserProperties[$key] = $value;
+                } else {
+                    $normalizedUserProperties[$key] = ['value' => $value];
+                }
+            }
+            if (!empty($normalizedUserProperties)) {
+                $payload['user_properties'] = $normalizedUserProperties;
+            }
+        }
 
         // Determine valid identifiers according to GA4 Measurement Protocol
         $clientId = trim($client_id);
@@ -67,7 +100,8 @@ class GoogleAnalyticMeasurementHelper
             $payload['user_id'] = $userId;
         }
 
-        $response = Http::post($this->endpoint, $payload);
+        $endpoint = $use_debug_endpoint ? $this->debugEndpoint : $this->endpoint;
+        $response = Http::post($endpoint, $payload);
 
         return $response->successful();
     }
