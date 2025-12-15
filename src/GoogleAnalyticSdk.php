@@ -216,9 +216,135 @@ class GoogleAnalyticSdk
     /**
      * @throws \Exception
      */
-    public static function sendReport(string $client_id='', string $name='custom', array $params=[], string $measurement_id='', string $measurement_api_secret='', array $credentials=null, string $credentials_path=null): bool
+    public static function sendReport(string $client_id = '', string $name = 'custom', array $params = [], string $measurement_id = '', string $measurement_api_secret = '', array $credentials = null, string $credentials_path = null, ?string $user_id = null, bool $debug = false): bool
     {
         $instance = new GoogleAnalyticMeasurementHelper(measurement_id: $measurement_id, measurement_api_secret: $measurement_api_secret, credentials: $credentials, credentials_path: $credentials_path);
-        return $instance->send($client_id, $name, $params);
+        return $instance->send($client_id, $name, $params, $user_id, $debug);
+    }
+
+    /**
+     * Resolve GA4 identifiers from current request and Laravel Auth.
+     *
+     * - client_id: parsed from _ga cookie if available.
+     * - user_id: Auth::user()->uuid when available.
+     */
+    public static function resolveIdsFromRequest(): array
+    {
+        $clientId = '';
+        $userId = null;
+
+        // Try parse _ga cookie → GA1.1.1234567890.1234567890
+        try {
+            $cookie = request()->cookie('_ga');
+            if (!empty($cookie)) {
+                // Expect segments like GA1.1.XXXX.YYYY → take last two parts
+                $segments = explode('.', $cookie);
+                if (count($segments) >= 4) {
+                    $candidate = $segments[count($segments)-2] . '.' . $segments[count($segments)-1];
+                    if (preg_match('/^\d+\.\d+$/', $candidate)) {
+                        $clientId = $candidate;
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            // ignore
+        }
+
+        // Use Laravel Auth (if available) to set user_id
+        try {
+            if (\Illuminate\Support\Facades\Auth::check()) {
+                $user = \Illuminate\Support\Facades\Auth::user();
+                if (isset($user->uuid)) {
+                    $userId = (string) $user->uuid;
+                }
+            }
+        } catch (\Throwable) {
+            // ignore
+        }
+
+        return [$clientId, $userId];
+    }
+
+    /**
+     * Send a standardized GA4 e-commerce add_to_cart event.
+     */
+    public static function eventAddToCart(array $items, float $value, string $currency = 'USD', array $extraParams = [], ?string $client_id = null, ?string $user_id = null, bool $debug = false): bool
+    {
+        [$resolvedClientId, $resolvedUserId] = self::resolveIdsFromRequest();
+        $params = array_merge([
+            'currency' => $currency,
+            'value' => $value,
+            'items' => $items,
+        ], $extraParams);
+
+        return self::sendReport(
+            client_id: $client_id ?? $resolvedClientId,
+            name: 'add_to_cart',
+            params: $params,
+            user_id: $user_id ?? $resolvedUserId,
+            debug: $debug
+        );
+    }
+
+    /**
+     * Send a standardized GA4 begin_checkout event.
+     */
+    public static function eventBeginCheckout(array $items, float $value, string $currency = 'USD', array $extraParams = [], ?string $client_id = null, ?string $user_id = null, bool $debug = false): bool
+    {
+        [$resolvedClientId, $resolvedUserId] = self::resolveIdsFromRequest();
+        $params = array_merge([
+            'currency' => $currency,
+            'value' => $value,
+            'items' => $items,
+        ], $extraParams);
+
+        return self::sendReport(
+            client_id: $client_id ?? $resolvedClientId,
+            name: 'begin_checkout',
+            params: $params,
+            user_id: $user_id ?? $resolvedUserId,
+            debug: $debug
+        );
+    }
+
+    /**
+     * Send a standardized GA4 purchase event.
+     */
+    public static function eventPurchase(string $transaction_id, array $items, float $value, string $currency = 'USD', array $extraParams = [], ?string $client_id = null, ?string $user_id = null, bool $debug = false): bool
+    {
+        [$resolvedClientId, $resolvedUserId] = self::resolveIdsFromRequest();
+        $params = array_merge([
+            'transaction_id' => $transaction_id,
+            'currency' => $currency,
+            'value' => $value,
+            'items' => $items,
+        ], $extraParams);
+
+        return self::sendReport(
+            client_id: $client_id ?? $resolvedClientId,
+            name: 'purchase',
+            params: $params,
+            user_id: $user_id ?? $resolvedUserId,
+            debug: $debug
+        );
+    }
+
+    /**
+     * Send a standardized GA4 sign_up event.
+     */
+    public static function eventSignUp(string $method = 'email', array $extraParams = [], ?string $client_id = null, ?string $user_id = null, bool $debug = false): bool
+    {
+        [$resolvedClientId, $resolvedUserId] = self::resolveIdsFromRequest();
+        $params = array_merge([
+            'method' => $method,
+        ], $extraParams);
+
+        return self::sendReport(
+            client_id: $client_id ?? $resolvedClientId,
+            name: 'sign_up',
+            params: $params,
+            user_id: $user_id ?? $resolvedUserId,
+            debug: $debug
+        );
     }
 }

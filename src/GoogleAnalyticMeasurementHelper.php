@@ -33,19 +33,38 @@ class GoogleAnalyticMeasurementHelper
     /**
      * @throws \Exception
      */
-    public function send(string $client_id='', string $name='custom', array $params=[]): bool
+    public function send(string $client_id = '', string $name = 'custom', array $params = [], ?string $user_id = null, bool $debug = false): bool
     {
+        // Build event payload
+        $eventParams = $params;
+        if ($debug) {
+            $eventParams['debug_mode'] = true;
+        }
+
         $payload = [
             'events' => [
                 [
                     'name' => $name,
-                    'params' => $params
+                    'params' => $eventParams,
                 ],
-            ]
+            ],
         ];
 
-        if (!empty($client_id)) {
-            $payload = array_merge($payload, ['client_id' => $client_id, 'user_data' => ['user_id' => $client_id]]);
+        // Determine valid identifiers according to GA4 Measurement Protocol
+        $clientId = trim($client_id);
+        $isLikelyClientId = (bool) preg_match('/^\d+\.\d+$/', $clientId);
+
+        if ($isLikelyClientId) {
+            $payload['client_id'] = $clientId;
+        }
+
+        // Use provided user_id or fall back to a non-client-id string (e.g. UUID)
+        $userId = $user_id;
+        if ($userId === null && $clientId !== '' && !$isLikelyClientId) {
+            $userId = $clientId; // backward compatible: earlier versions passed UUID as client_id
+        }
+        if (!empty($userId)) {
+            $payload['user_id'] = $userId;
         }
 
         $response = Http::post($this->endpoint, $payload);

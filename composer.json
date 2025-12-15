@@ -3,7 +3,7 @@
     "description": "Laravel package for GA4",
     "type": "library",
     "license": "MIT",
-    "version": "1.1.3",
+    "version": "1.1.5",
     "autoload": {
         "psr-4": {
             "FunnyDev\\GoogleAnalytic\\": "src/"
@@ -19,7 +19,7 @@
     "homepage": "https://github.com/funnydevjsc/google-analytic-laravel-integrate",
     "keywords": ["Laravel", "package", "analytic", "google", "ga4"],
     "require": {
-        "php": "^8.1",
+        "php": "^8.1|^8.2|^8.3|^8.4",
         "funnydevjsc/google-client-laravel-integrate": "^1.0"
     },
     "require-dev": {
